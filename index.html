@@ -341,11 +341,6 @@
           </div>
         </div>
 
-        <div class="field">
-          <label for="sheets-url">Google Apps Script Web App URL</label>
-          <input id="sheets-url" autocomplete="off"
-            placeholder="https://script.google.com/macros/s/AKfycbwGXG84pDQtw-ggNEmVAZmqr-1OIc0BhUQU1Up5cLz408tZkbhlsdSfkPfVUbsXH4c1/exec">
-        </div>
 
         <div class="actions">
           <button id="start-button" type="button">시작</button>
@@ -409,6 +404,10 @@
 
   <script id="memory-span-app">
     (function () {
+      /* ── 여기에 본인의 Google Apps Script Web App URL을 입력하세요 ── */
+      const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGXG84pDQtw-ggNEmVAZmqr-1OIc0BhUQU1Up5cLz408tZkbhlsdSfkPfVUbsXH4c1/exec';
+      /* ───────────────────────────────────────────────────────────── */
+
       const STIMULUS_MS = 700;
       const GAP_MS = 300;
       const RETENTION_INTERVAL_MS = 1000;
@@ -744,7 +743,6 @@
 
       function startExperiment() {
         const participantInput = $('participant-id');
-        const sheetsUrlInput = $('sheets-url');
         const modeInput = document.querySelector('input[name="mode"]:checked');
         const participantId = participantInput ? participantInput.value.trim() : '';
         if (!participantId) {
@@ -756,7 +754,7 @@
 
         state.participantId = participantId;
         state.mode = modeInput ? modeInput.value : 'digits';
-        state.sheetsUrl = sheetsUrlInput ? sheetsUrlInput.value.trim() : '';
+        state.sheetsUrl = SHEETS_URL;
         state.trials = buildTrials({ mode: state.mode });
         state.currentIndex = 0;
         state.results = [];
