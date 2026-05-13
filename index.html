@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Memory Span Task v1</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #1b1f24;
+      --muted: #667085;
+      --line: #d8dee8;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --coral: #b93815;
+      --amber: #b7791f;
+      --shadow: 0 18px 42px rgba(27, 31, 36, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .app-shell {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .subtle {
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    label {
+      font-weight: 700;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .segmented label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .segmented input {
+      width: 16px;
+      min-height: 16px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      min-height: 44px;
+      padding: 10px 14px;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #eef2f7;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    button.warning {
+      background: var(--coral);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.58;
+    }
+
+    .status-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 0;
+    }
+
+    .stat:last-child {
+      border-bottom: 0;
+    }
+
+    .stage {
+      display: grid;
+      min-height: 420px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .stimulus {
+      font-size: clamp(54px, 12vw, 112px);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+      min-width: min(680px, 100%);
+      min-height: 132px;
+      display: grid;
+      place-items: center;
+      overflow-wrap: anywhere;
+    }
+
+    .cue {
+      display: grid;
+      gap: 8px;
+      justify-items: center;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #e8edf3;
+      margin-top: 14px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--amber);
+      transition: width 180ms ease;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfe;
+    }
+
+    .summary-box strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1.1;
+      color: var(--teal-dark);
+      overflow-wrap: anywhere;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 780px) {
+
+      .grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app-shell">
+    <header>
+      <div>
+        <h1>Memory Span Task v1</h1>
+        <p class="subtle">자극 제시 후 유지 구간 1초, 응답, CSV 저장까지 한 번에 진행합니다.</p>
+      </div>
+      <span class="pill">Retention interval: 1000 ms</span>
+    </header>
+
+    <section id="screen-start" class="grid">
+      <div class="panel">
+        <h2>실험 시작</h2>
+        <p class="subtle">참가자 ID를 입력하고 자극 유형을 선택하세요. 숫자 모드는 과제 기본형이고, 단어 모드는 난이도를 조금 높인 변형입니다.</p>
+
+        <div class="field">
+          <label for="participant-id">참가자 ID</label>
+          <input id="participant-id" autocomplete="off" placeholder="예: P001">
+        </div>
+
+        <div class="field">
+          <label>자극 유형</label>
+          <div class="segmented" role="radiogroup" aria-label="자극 유형">
+            <label>
+              <input type="radio" name="mode" value="digits" checked>
+              숫자
+            </label>
+            <label>
+              <input type="radio" name="mode" value="words">
+              단어
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="sheets-url">Google Apps Script Web App URL</label>
+          <input id="sheets-url" autocomplete="off"
+            placeholder="https://script.google.com/macros/s/AKfycbwGXG84pDQtw-ggNEmVAZmqr-1OIc0BhUQU1Up5cLz408tZkbhlsdSfkPfVUbsXH4c1/exec">
+        </div>
+
+        <div class="actions">
+          <button id="start-button" type="button">시작</button>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <h2>설정</h2>
+        <div class="status-list">
+          <div class="stat"><span>Trial</span><strong>12</strong></div>
+          <div class="stat"><span>Sequence length</span><strong>3, 4, 5, 6</strong></div>
+          <div class="stat"><span>각 길이 반복</span><strong>3회</strong></div>
+          <div class="stat"><span>자극 1개 제시</span><strong>700 ms</strong></div>
+          <div class="stat"><span>자극 사이 공백</span><strong>300 ms</strong></div>
+          <div class="stat"><span>유지 구간</span><strong>1000 ms</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="screen-task" class="panel hidden" aria-live="polite">
+      <div class="stat">
+        <span id="trial-status">Trial 1 / 12</span>
+        <strong id="length-status">Length 3</strong>
+      </div>
+      <div class="progress-bar" aria-hidden="true">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+
+      <div id="stimulus-stage" class="stage">
+        <div class="cue">
+          <div id="stimulus-text" class="stimulus">준비</div>
+          <p id="stage-help" class="subtle">화면에 나오는 항목을 순서대로 기억하세요.</p>
+        </div>
+      </div>
+
+      <div id="response-panel" class="hidden">
+        <h2>응답 입력</h2>
+        <p id="response-help" class="subtle">방금 본 항목을 순서대로 입력하세요.</p>
+        <div class="field">
+          <label for="response-input">응답</label>
+          <textarea id="response-input" autocomplete="off"></textarea>
+        </div>
+        <div class="actions">
+          <button id="submit-button" type="button">제출</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-results" class="panel hidden">
+      <h2>결과 요약</h2>
+      <div id="summary" class="summary-grid"></div>
+      <div class="actions">
+        <button id="download-button" type="button">CSV 다운로드</button>
+        <button id="send-sheets-button" class="secondary" type="button">Google Sheets 전송</button>
+        <button id="restart-button" class="secondary" type="button">다시 시작</button>
+      </div>
+      <p id="sheets-status" class="subtle"></p>
+      <div id="length-table"></div>
+    </section>
+  </main>
+
+  <script id="memory-span-app">
+    (function () {
+      const STIMULUS_MS = 700;
+      const GAP_MS = 300;
+      const RETENTION_INTERVAL_MS = 1000;
+      const TRIAL_LENGTHS = [3, 4, 5, 6];
+      const TRIALS_PER_LENGTH = 3;
+      const DIGIT_POOL = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+      const WORD_POOL = ['나무', '책상', '기차', '사과', '강물', '창문', '연필', '바다', '시계', '모자', '피아노', '구름', '의자', '가방', '우산', '꽃병'];
+
+      function shuffleItems(items, random = Math.random) {
+        const copy = [...items];
+        for (let index = copy.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(random() * (index + 1));
+          [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+        }
+        return copy;
+      }
+
+      function generateSequence(mode, length, random = Math.random) {
+        const pool = mode === 'words' ? WORD_POOL : DIGIT_POOL;
+        return shuffleItems(pool, random).slice(0, length);
+      }
+
+      function buildTrials({ mode = 'digits', random = Math.random, shuffle = shuffleItems } = {}) {
+        const trials = [];
+        TRIAL_LENGTHS.forEach((length) => {
+          for (let repeat = 0; repeat < TRIALS_PER_LENGTH; repeat += 1) {
+            trials.push({
+              mode,
+              sequence: generateSequence(mode, length, random),
+              stimulusMs: STIMULUS_MS,
+              gapMs: GAP_MS,
+              retentionMs: RETENTION_INTERVAL_MS,
+            });
+          }
+        });
+        return shuffle(trials, random);
+      }
+
+      function normalizeResponse(response, mode) {
+        const trimmed = String(response || '').trim();
+        if (!trimmed) {
+          return [];
+        }
+        if (mode === 'words') {
+          return trimmed
+            .replace(/[,\n\r\t]+/g, ' ')
+            .split(/\s+/)
+            .filter(Boolean);
+        }
+        return trimmed.replace(/\D/g, '').split('').filter(Boolean);
+      }
+
+      function scoreResponse(sequence, response, mode = 'digits') {
+        const normalizedResponse = normalizeResponse(response, mode);
+        const positionCorrect = sequence.map((item, index) => normalizedResponse[index] === item ? 1 : 0);
+        const exactCorrect = normalizedResponse.length === sequence.length && positionCorrect.every(Boolean);
+        return { normalizedResponse, exactCorrect, positionCorrect };
+      }
+
+      function createResultRow({ participantId, trialIndex, trial, response, responseTimeMs, previousSequence }) {
+        const score = scoreResponse(trial.sequence, response, trial.mode);
+        return {
+          participant_id: participantId,
+          trial_index: trialIndex,
+          sequence_length: trial.sequence.length,
+          target_sequence: trial.sequence.join(''),
+          response: score.normalizedResponse.join(''),
+          exact_correct: score.exactCorrect ? 1 : 0,
+          position_correct: score.positionCorrect.join(''),
+          response_time_ms: Math.round(responseTimeMs),
+          timestamp: new Date().toISOString(),
+          mode: trial.mode,
+          retention_interval_ms: trial.retentionMs,
+          previous_sequence: (previousSequence || []).join(''),
+        };
+      }
+
+      function summarizeResults(rows) {
+        const totalTrials = rows.length;
+        const exactTotal = rows.reduce((sum, row) => sum + Number(row.exact_correct), 0);
+        const exactAccuracy = totalTrials ? exactTotal / totalTrials : 0;
+        const byLength = {};
+
+        rows.forEach((row) => {
+          const key = String(row.sequence_length);
+          if (!byLength[key]) {
+            byLength[key] = { length: row.sequence_length, total: 0, correct: 0, accuracy: 0 };
+          }
+          byLength[key].total += 1;
+          byLength[key].correct += Number(row.exact_correct);
+        });
+
+        Object.values(byLength).forEach((entry) => {
+          entry.accuracy = entry.total ? entry.correct / entry.total : 0;
+        });
+
+        const estimatedSpan = Object.values(byLength)
+          .filter((entry) => entry.accuracy >= 2 / 3)
+          .reduce((max, entry) => Math.max(max, entry.length), 0);
+
+        return { totalTrials, exactAccuracy, estimatedSpan, byLength };
+      }
+
+      function escapeCsv(value) {
+        const text = String(value ?? '');
+        if (/[",\n\r]/.test(text)) {
+          return '"' + text.replace(/"/g, '""') + '"';
+        }
+        return text;
+      }
+
+      function toCsv(rows) {
+        const columns = [
+          'participant_id',
+          'trial_index',
+          'sequence_length',
+          'target_sequence',
+          'response',
+          'exact_correct',
+          'position_correct',
+          'response_time_ms',
+          'timestamp',
+          'mode',
+          'retention_interval_ms',
+          'previous_sequence',
+        ];
+        const lines = [columns.join(',')];
+        rows.forEach((row) => {
+          lines.push(columns.map((column) => escapeCsv(row[column])).join(','));
+        });
+        return lines.join('\n');
+      }
+
+      function buildSheetsPayload({ participantId, mode, rows }) {
+        return {
+          participant_id: participantId,
+          mode,
+          retention_interval_ms: RETENTION_INTERVAL_MS,
+          row_count: rows.length,
+          rows,
+        };
+      }
+
+      window.MemorySpanCore = {
+        STIMULUS_MS,
+        GAP_MS,
+        RETENTION_INTERVAL_MS,
+        TRIAL_LENGTHS,
+        TRIALS_PER_LENGTH,
+        buildTrials,
+        generateSequence,
+        scoreResponse,
+        createResultRow,
+        summarizeResults,
+        toCsv,
+        buildSheetsPayload,
+      };
+
+      const state = {
+        participantId: '',
+        mode: 'digits',
+        sheetsUrl: '',
+        trials: [],
+        currentIndex: 0,
+        results: [],
+        responseStartedAt: 0,
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      function setScreen(activeId) {
+        ['screen-start', 'screen-task', 'screen-results'].forEach((id) => {
+          const element = $(id);
+          if (element) {
+            element.classList.toggle('hidden', id !== activeId);
+          }
+        });
+      }
+
+      function updateProgress() {
+        const fill = $('progress-fill');
+        if (fill) {
+          fill.style.width = `${(state.currentIndex / state.trials.length) * 100}%`;
+        }
+      }
+
+      async function runCurrentTrial() {
+        const trial = state.trials[state.currentIndex];
+        const stimulusText = $('stimulus-text');
+        const stageHelp = $('stage-help');
+        const responsePanel = $('response-panel');
+        const responseInput = $('response-input');
+        const trialStatus = $('trial-status');
+        const lengthStatus = $('length-status');
+
+        if (!trial || !stimulusText || !stageHelp || !responsePanel || !responseInput || !trialStatus || !lengthStatus) {
+          return;
+        }
+
+        responsePanel.classList.add('hidden');
+        responseInput.value = '';
+        trialStatus.textContent = `Trial ${state.currentIndex + 1} / ${state.trials.length}`;
+        lengthStatus.textContent = `Length ${trial.sequence.length}`;
+        updateProgress();
+
+        stageHelp.textContent = '화면에 나오는 항목을 순서대로 기억하세요.';
+        for (const item of trial.sequence) {
+          stimulusText.textContent = item;
+          await sleep(trial.stimulusMs);
+          stimulusText.textContent = '';
+          await sleep(trial.gapMs);
+        }
+
+        stimulusText.textContent = '+';
+        stageHelp.textContent = '유지 구간 1초';
+        await sleep(trial.retentionMs);
+
+        stimulusText.textContent = '';
+        stageHelp.textContent = '응답을 입력하세요.';
+        responsePanel.classList.remove('hidden');
+        state.responseStartedAt = performance.now();
+        responseInput.focus();
+      }
+
+      function handleSubmit() {
+        const trial = state.trials[state.currentIndex];
+        const responseInput = $('response-input');
+        if (!trial || !responseInput) {
+          return;
+        }
+
+        const previousTrial = state.trials[state.currentIndex - 1];
+        const row = createResultRow({
+          participantId: state.participantId,
+          trialIndex: state.currentIndex + 1,
+          trial,
+          response: responseInput.value,
+          responseTimeMs: performance.now() - state.responseStartedAt,
+          previousSequence: previousTrial ? previousTrial.sequence : [],
+        });
+
+        state.results.push(row);
+        state.currentIndex += 1;
+        if (state.currentIndex >= state.trials.length) {
+          showResults();
+        } else {
+          runCurrentTrial();
+        }
+      }
+
+      function formatPercent(value) {
+        return `${Math.round(value * 100)}%`;
+      }
+
+      function showResults() {
+        setScreen('screen-results');
+        const summary = summarizeResults(state.results);
+        const summaryRoot = $('summary');
+        const tableRoot = $('length-table');
+
+        if (summaryRoot) {
+          summaryRoot.innerHTML = `
+            <div class="summary-box"><span>전체 trial</span><strong>${summary.totalTrials}</strong></div>
+            <div class="summary-box"><span>전체 정확도</span><strong>${formatPercent(summary.exactAccuracy)}</strong></div>
+            <div class="summary-box"><span>추정 span</span><strong>${summary.estimatedSpan || '-'}</strong></div>
+            <div class="summary-box"><span>유지 구간</span><strong>1초</strong></div>
+          `;
+        }
+
+        if (tableRoot) {
+          const rows = Object.values(summary.byLength)
+            .sort((a, b) => a.length - b.length)
+            .map((entry) => `<tr><td>${entry.length}</td><td>${entry.correct} / ${entry.total}</td><td>${formatPercent(entry.accuracy)}</td></tr>`)
+            .join('');
+          tableRoot.innerHTML = `
+            <table>
+              <thead><tr><th>Sequence length</th><th>정답</th><th>정확도</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+        }
+      }
+
+      function downloadCsv() {
+        const csv = toCsv(state.results);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `memory_span_${state.participantId || 'participant'}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function sendToSheets() {
+        const status = $('sheets-status');
+        if (!state.sheetsUrl) {
+          if (status) {
+            status.textContent = '시작 화면에서 Google Apps Script Web App URL을 입력하면 시트로 전송할 수 있습니다.';
+          }
+          return;
+        }
+
+        const payload = buildSheetsPayload({
+          participantId: state.participantId,
+          mode: state.mode,
+          rows: state.results,
+        });
+
+        if (status) {
+          status.textContent = 'Google Sheets로 전송 중입니다.';
+        }
+
+        try {
+          await fetch(state.sheetsUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload),
+          });
+          if (status) {
+            status.textContent = '전송 요청을 보냈습니다. Google Sheet에서 데이터가 들어왔는지 확인하세요.';
+          }
+        } catch (error) {
+          if (status) {
+            status.textContent = `전송 실패: ${error.message}`;
+          }
+        }
+      }
+
+      function startExperiment() {
+        const participantInput = $('participant-id');
+        const sheetsUrlInput = $('sheets-url');
+        const modeInput = document.querySelector('input[name="mode"]:checked');
+        const participantId = participantInput ? participantInput.value.trim() : '';
+        if (!participantId) {
+          participantInput.focus();
+          participantInput.setAttribute('aria-invalid', 'true');
+          return;
+        }
+        participantInput.setAttribute('aria-invalid', 'false');
+
+        state.participantId = participantId;
+        state.mode = modeInput ? modeInput.value : 'digits';
+        state.sheetsUrl = sheetsUrlInput ? sheetsUrlInput.value.trim() : '';
+        state.trials = buildTrials({ mode: state.mode });
+        state.currentIndex = 0;
+        state.results = [];
+        setScreen('screen-task');
+        runCurrentTrial();
+      }
+
+      function restart() {
+        state.participantId = '';
+        state.sheetsUrl = '';
+        state.trials = [];
+        state.currentIndex = 0;
+        state.results = [];
+        setScreen('screen-start');
+        const fill = $('progress-fill');
+        if (fill) {
+          fill.style.width = '0%';
+        }
+      }
+
+      function init() {
+        if (!$('screen-start')) {
+          return;
+        }
+
+        $('start-button').addEventListener('click', startExperiment);
+        $('submit-button').addEventListener('click', handleSubmit);
+        $('download-button').addEventListener('click', downloadCsv);
+        $('send-sheets-button').addEventListener('click', sendToSheets);
+        $('restart-button').addEventListener('click', restart);
+        $('response-input').addEventListener('keydown', (event) => {
+          if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            handleSubmit();
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    }());
+  </script>
+</body>
+
+</html>
